@@ -83,6 +83,7 @@ public class CartController {
             return ResponseEntity.status(HttpStatus.OK).body(response.toString());
         }else{
             boolean check = orderDetaildao.removeCart(session.getCustomerid(),idorderdetail);
+            System.out.println(check);
             response.put("code",200);
             response.put("description","Thành công");
             response.put("results",orderDetaildao.listCartCustomer(session.getCustomerid()));

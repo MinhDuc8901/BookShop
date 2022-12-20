@@ -59,9 +59,10 @@ public class OrderController {
             response.put("description","Vui lòng đăng nhập lại");
             return ResponseEntity.status(HttpStatus.OK).body(response.toString());
         }else{
+            orderDAO.updateRemoveOrder(idOrder);
             response.put("code",200);
             response.put("description","Thành công");
-            response.put("results",orderDAO.updateRemoveOrder(idOrder));
+            response.put("results",orderDAO.getListOrder(session.getCustomerid()));
             return ResponseEntity.status(HttpStatus.OK).body(response.toString());
         }
     }

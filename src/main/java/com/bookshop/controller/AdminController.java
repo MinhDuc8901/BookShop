@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
@@ -71,7 +72,7 @@ public class AdminController {
 
     // Thêm sản phẩm
     @PostMapping("/addProduct")
-    public ResponseEntity<?> addProduct(@RequestBody String data) {
+    public ResponseEntity<?> addProduct(@RequestBody String data) throws ParseException {
         JSONObject readData = new JSONObject(data);
         // tham số nhận
         int categoryid = readData.getInt("categoryid");
@@ -84,7 +85,7 @@ public class AdminController {
         int discount = readData.getInt("discount");
         String author = readData.getString("author");
         int pagenumber = readData.getInt("pagenumber");
-        // String create = readData.getString("create");
+        String create = readData.getString("create");
         String sessionId = readData.getString("sessionId");
         // kết thúc tham số nhận
         Session session = sesSer.getSession(sessionId);
@@ -98,7 +99,7 @@ public class AdminController {
             product.setAuthor(author);
             product.setCategoryid(categoryid);
             product.setContent(content);
-            product.setCreate(new Date());
+//            product.setCreate(new Date());
             product.setDescription(description);
             product.setDiscount(discount);
             product.setName(name);
@@ -106,7 +107,7 @@ public class AdminController {
             product.setPhoto(photo);
             product.setHot(hot);
             product.setPrice(price);
-            // product.setCreate(sf.parse(create));
+             product.setCreate(sf.parse(create));
             productDao.insertProduct(product);
             response.put("code", 200);
             response.put("description", "Thành công");
@@ -127,7 +128,7 @@ public class AdminController {
 
     // sửa sản phẩm
     @PostMapping("/saveProduct")
-    public ResponseEntity<?> saveProduct(@RequestBody String data) {
+    public ResponseEntity<?> saveProduct(@RequestBody String data) throws ParseException {
         JSONObject readData = new JSONObject(data);
         // tham số nhận
         int id = readData.getInt("id");
@@ -140,6 +141,7 @@ public class AdminController {
         Double price = readData.getDouble("price");
         int discount = readData.getInt("discount");
         String author = readData.getString("author");
+        String create = readData.getString("create");
         int pagenumber = readData.getInt("pagenumber");
 
         String sessionId = readData.getString("sessionId");
@@ -156,7 +158,7 @@ public class AdminController {
             product.setAuthor(author);
             product.setCategoryid(categoryid);
             product.setContent(content);
-            product.setCreate(new Date());
+            product.setCreate(sf.parse(create));
             product.setDescription(description);
             product.setDiscount(discount);
             product.setName(name);
@@ -164,7 +166,7 @@ public class AdminController {
             product.setPhoto(photo);
             product.setHot(hot);
             product.setPrice(price);
-            proSer.saveProduct(product);
+            productDao.updateProduct(product);
             response.put("code", 200);
             response.put("description", "Thành công");
             response.put("results", proSer.getListProducts());

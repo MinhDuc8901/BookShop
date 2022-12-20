@@ -1,6 +1,7 @@
 package com.bookshop.controller;
 
 import com.bookshop.dao.CommentsDAO;
+import com.bookshop.dao.ProductsDAO;
 import com.bookshop.entities.Comments;
 import com.bookshop.entities.Products;
 import com.bookshop.entities.Session;
@@ -30,6 +31,8 @@ public class ProductsController {
 
     private CommentsDAO comDAO = new CommentsDAO();
 
+    private ProductsDAO productsDao = new ProductsDAO();
+
 //    hàm lấy ra tất cả sản phẩm
     @GetMapping("/allproduct")
     public ResponseEntity<?> getListProduct(){
@@ -49,13 +52,14 @@ public class ProductsController {
         return ResponseEntity.status(HttpStatus.OK).body(response.toString());
     }
 //    Hàm lấy ra một sản phẩm
+//    VD đường dẫn http://localhost:8080/api/v1/product/1
     @GetMapping("/{id}")
     public ResponseEntity<?> getProduct(@PathVariable("id") int id){
         Products product = proService.getProduct(id);
         JSONObject response = new JSONObject();
         response.put("code",200);
         response.put("description","Thành công");
-        response.put("results",product);
+        response.put("results",new JSONObject(product));
         return ResponseEntity.status(HttpStatus.OK).body(response.toString());
     }
 //    Hàm lấy những sản phẩm đang hot
@@ -74,7 +78,7 @@ public class ProductsController {
         response.put("code",200);
         response.put("description","Thành công");
         response.put("results",data);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response.toString());
     }
 
 //    Hàm tìm kiếm sản phẩm theo tên
@@ -92,6 +96,7 @@ public class ProductsController {
         return ResponseEntity.status(HttpStatus.OK).body(response.toString());
     }
     // lấy thông tin đánh giá của một sản phẩm số lượng sao
+    // khuyến cáo không nên sử dụng api này nữa vì đã có api thay thế là api lấy danh sách comments của sản phẩm
     @GetMapping("/star/{id}")
     public ResponseEntity<?> getStarProduct(@PathVariable("id") int id){
         JSONArray data = rateSer.getProductStar(id);
@@ -103,28 +108,30 @@ public class ProductsController {
     }
 
     // lấy danh sách sản phẩm theo loại sản phẩm
-    @GetMapping("/category/{id}")
+    @GetMapping("/category/{id}")// id là giá trị trong list danh sách category
     public ResponseEntity<?> getProductsCategory(@PathVariable("id") int id){
-        List<Products> products = cateser.getListProductCate(id);
-        JSONObject product = null;
-        JSONArray data = new JSONArray();
-        for(Products item : products){
-            product = new JSONObject(item);
-            JSONArray rate = rateSer.getProductStar(item.getId());
-            product.put("rate",rate);
-            data.put(product);
-        }
+        JSONArray products = productsDao.getListCategory(id);
+//        JSONObject product = null;
+//        JSONArray data = new JSONArray();
+//        for(Products item : products){
+//            product = new JSONObject(item);
+//            JSONArray rate = rateSer.getProductStar(item.getId());
+////            product.put("rate",rate);
+//            data.put(product);
+//        }
         JSONObject response = new JSONObject();
         response.put("code",200);
         response.put("description","Thành công");
-        response.put("results",data);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        response.put("results",products);
+        return ResponseEntity.status(HttpStatus.OK).body(response.toString());
     }
     // Lấy danh sách comments của sản phẩm đó
-    @GetMapping("/comments/{id}")
+    // VD http://localhost:8080/api/v1/product/comments/1
+    // Chú ý phương thưc GET
+    @GetMapping("/comments/{id}")// id ở đây tương ứng với id trong list danh sách sản phẩm
     public ResponseEntity<?> getCommets(@PathVariable("id") int id){
         JSONObject response = new JSONObject();
-        JSONArray data = comSer.getComments(id);
+        JSONArray data = productsDao.getComment(id);
         JSONObject starAll = new JSONObject();
         for (int i = 1; i<=5 ; i++){
             starAll.put("star_"+i,comDAO.getStarNumber(id,i));
@@ -158,13 +165,26 @@ public class ProductsController {
             com.setProductid(productId);
             com.setStar(star);
             comSer.saveComment(com);
-            JSONArray dataComments = comSer.getComments(productId);
+            JSONArray dataCom = productsDao.getComment(productId);
+            JSONObject starAll = new JSONObject();
+            for (int i = 1; i<=5 ; i++){
+                starAll.put("star_"+i,comDAO.getStarNumber(productId,i));
+            }
             response.put("code",200);
             response.put("description", "Thành công");
-            response.put("results",dataComments);
+            response.put("results",dataCom);
+            response.put("dataStar",starAll);
             return ResponseEntity.status(HttpStatus.OK).body(response.toString());
         }
     }
-
-
+    // lấy list danh sách category
+    @GetMapping("/category")
+    public ResponseEntity<?> getListCategory(){
+        JSONObject response = new JSONObject();
+        JSONArray data = productsDao.getCategory();
+        response.put("code",200);
+        response.put("description","Thành công");
+        response.put("results",data);
+        return ResponseEntity.ok(response.toString());
+    }
 }

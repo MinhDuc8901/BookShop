@@ -44,9 +44,10 @@ public class OrderDAO {
         ResultSet rs = null;
         try{
             con = DBUntil.openConnection();
-            pstmt = con.prepareStatement("UPDATE Orders\n" +
-                    "SET `status` = 0\n" +
-                    "WHERE id = ?;");
+//            pstmt = con.prepareStatement("UPDATE Orders\n" +
+//                    "SET `status` = 0\n" +
+//                    "WHERE id = ?;");
+            pstmt = con.prepareStatement("DELETE FROM Orders WHERE id =?;");
             pstmt.setInt(1,idOrder);
             int a = pstmt.executeUpdate();
             if(a>0){

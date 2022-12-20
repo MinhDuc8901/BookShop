@@ -72,7 +72,7 @@ public class OrderDetailDAO {
         ResultSet rs = null;
         try{
             con = DBUntil.openConnection();
-            pstmt = con.prepareStatement("DELETE FROM OrderDetail WHERE customerid = ? and productid = ?;");
+            pstmt = con.prepareStatement("DELETE FROM OrderDetail WHERE customerid = ? and id = ?;");
             pstmt.setInt(1,idCustomer);
             pstmt.setInt(2,productid);
             int a = pstmt.executeUpdate();
