@@ -1,6 +1,7 @@
 package com.bookshop.controller;
 
 import com.bookshop.dao.CustomerDAO;
+import com.bookshop.dao.ProductsDAO;
 import com.bookshop.entities.Customers;
 import com.bookshop.entities.Products;
 import com.bookshop.entities.Session;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
@@ -28,41 +30,48 @@ public class AdminController {
     private ProductService proSer;
 
     private CustomerDAO customerDao = new CustomerDAO();
+    private ProductsDAO productDao = new ProductsDAO();
 
-//    đăng nhập bằng quyền admin
+    // convert string to date
+    private SimpleDateFormat sf = new SimpleDateFormat("dd/MM/yyyy");
+
+    // đăng nhập bằng quyền admin
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody String data){
+    public ResponseEntity<?> login(@RequestBody String data) {
         JSONObject readData = new JSONObject(data);
         // tham số nhận
         String email = readData.getString("email");
         String password = readData.getString("password");
         // kết thúc tham số nhận
         Customers getCustomer = cusService.getCustomer(email);
-        if(customerDao.getRole(getCustomer.getRoleid()).getInt("admin") == 1){
-            JSONObject response = new JSONObject();
-            if(getCustomer!=null){
-                if(getCustomer.getPassword().equals(password)){
+        JSONObject response = new JSONObject();
+        if (getCustomer != null) {
+            if (customerDao.getRole(getCustomer.getRoleid()).getInt("admin") == 1) {
+                if (getCustomer.getPassword().equals(password)) {
                     UUID createSession = UUID.randomUUID();
                     Session session = cusService.SaveSession(getCustomer.getId(), createSession.toString());
-                    response.put("session_id",createSession.toString());
-                    response.put("results",customerDao.getCustomer(getCustomer.getId()));
-                    response.put("code",200);
-                    response.put("description","Đặng nhập thành công");
+                    response.put("session_id", createSession.toString());
+                    response.put("results", customerDao.getCustomer(getCustomer.getId()));
+                    response.put("code", 200);
+                    response.put("description", "Đặng nhập thành công");
                     return ResponseEntity.status(HttpStatus.OK).body(response.toString());
+                } else {
+                    return ResponseEntity.status(HttpStatus.OK)
+                            .body(new Response(400, "Vui lòng nhập lại mật khẩu.", ""));
                 }
-                else{
-                    return ResponseEntity.status(HttpStatus.OK).body(new Response(400,"Vui lòng nhập lại mật khẩu.",""));
-                }
-            }else{
-                return ResponseEntity.status(HttpStatus.OK).body(new Response(400,"Tài khoản không tồn tại vui lòng đăng ký tài khoản.",""));
+            } else {
+                return ResponseEntity.ok(new Response(400, "Tài khoản đăng nhập không hợp lệ", ""));
             }
-        }else{
-            return ResponseEntity.ok(new Response(400,"Tài khoản đăng nhập không hợp lệ",""));
+        } else {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new Response(400, "Tài khoản không tồn tại vui lòng đăng ký tài khoản.", ""));
         }
+
     }
-//    Thêm sản phẩm
+
+    // Thêm sản phẩm
     @PostMapping("/addProduct")
-    public ResponseEntity<?> addProduct(@RequestBody String data){
+    public ResponseEntity<?> addProduct(@RequestBody String data) {
         JSONObject readData = new JSONObject(data);
         // tham số nhận
         int categoryid = readData.getInt("categoryid");
@@ -75,15 +84,16 @@ public class AdminController {
         int discount = readData.getInt("discount");
         String author = readData.getString("author");
         int pagenumber = readData.getInt("pagenumber");
+        // String create = readData.getString("create");
         String sessionId = readData.getString("sessionId");
         // kết thúc tham số nhận
         Session session = sesSer.getSession(sessionId);
         JSONObject response = new JSONObject();
-        if(session == null){
-            response.put("code",400);
-            response.put("description","Vui lòng đăng nhập lại");
+        if (session == null) {
+            response.put("code", 400);
+            response.put("description", "Vui lòng đăng nhập lại");
             return ResponseEntity.status(HttpStatus.OK).body(response.toString());
-        }else{
+        } else {
             Products product = new Products();
             product.setAuthor(author);
             product.setCategoryid(categoryid);
@@ -96,26 +106,28 @@ public class AdminController {
             product.setPhoto(photo);
             product.setHot(hot);
             product.setPrice(price);
-            proSer.saveProduct(product);
-            response.put("code",200);
-            response.put("description","Thành công");
-            response.put("results",proSer.getListProducts());
+            // product.setCreate(sf.parse(create));
+            productDao.insertProduct(product);
+            response.put("code", 200);
+            response.put("description", "Thành công");
+            response.put("results", proSer.getListProducts());
             return ResponseEntity.status(HttpStatus.OK).body(response.toString());
         }
     }
+
     // Lấy ra tất cả sản phẩm
     @GetMapping("/allProduct")
-    public ResponseEntity<?> getListProducts (){
+    public ResponseEntity<?> getListProducts() {
         JSONObject response = new JSONObject();
-        response.put("code",200);
-        response.put("description","Thành công");
-        response.put("results",proSer.getListProducts());
-        return  ResponseEntity.status(HttpStatus.OK).body(response.toString());
+        response.put("code", 200);
+        response.put("description", "Thành công");
+        response.put("results", proSer.getListProducts());
+        return ResponseEntity.status(HttpStatus.OK).body(response.toString());
     }
 
     // sửa sản phẩm
     @PostMapping("/saveProduct")
-    public ResponseEntity<?> saveProduct(@RequestBody String data){
+    public ResponseEntity<?> saveProduct(@RequestBody String data) {
         JSONObject readData = new JSONObject(data);
         // tham số nhận
         int id = readData.getInt("id");
@@ -134,11 +146,11 @@ public class AdminController {
         // kết thúc tham số nhận
         Session session = sesSer.getSession(sessionId);
         JSONObject response = new JSONObject();
-        if(session == null){
-            response.put("code",400);
-            response.put("description","Vui lòng đăng nhập lại");
+        if (session == null) {
+            response.put("code", 400);
+            response.put("description", "Vui lòng đăng nhập lại");
             return ResponseEntity.status(HttpStatus.OK).body(response.toString());
-        }else{
+        } else {
             Products product = new Products();
             product.setId(id);
             product.setAuthor(author);
@@ -153,15 +165,16 @@ public class AdminController {
             product.setHot(hot);
             product.setPrice(price);
             proSer.saveProduct(product);
-            response.put("code",200);
-            response.put("description","Thành công");
-            response.put("results",proSer.getListProducts());
+            response.put("code", 200);
+            response.put("description", "Thành công");
+            response.put("results", proSer.getListProducts());
             return ResponseEntity.status(HttpStatus.OK).body(response.toString());
         }
     }
+
     // xóa sản phẩm
     @PostMapping("/remove")
-    public ResponseEntity<?> removeProduct(@RequestBody String data){
+    public ResponseEntity<?> removeProduct(@RequestBody String data) {
         JSONObject readData = new JSONObject(data);
         // tham số nhận
         String sessionId = readData.getString("sessionId");
@@ -169,18 +182,17 @@ public class AdminController {
         // kết thúc tham số nhận
         Session session = sesSer.getSession(sessionId);
         JSONObject response = new JSONObject();
-        if(session == null){
-            response.put("code",400);
-            response.put("description","Vui lòng đăng nhập lại");
+        if (session == null) {
+            response.put("code", 400);
+            response.put("description", "Vui lòng đăng nhập lại");
             return ResponseEntity.status(HttpStatus.OK).body(response.toString());
-        }else{
+        } else {
             proSer.deleteProduct(idProduct);
-            response.put("code",200);
-            response.put("description","Thành công");
-            response.put("results",proSer.getListProducts());
+            response.put("code", 200);
+            response.put("description", "Thành công");
+            response.put("results", proSer.getListProducts());
             return ResponseEntity.status(HttpStatus.OK).body(response.toString());
         }
     }
-
 
 }
