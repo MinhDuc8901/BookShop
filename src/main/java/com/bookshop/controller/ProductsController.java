@@ -36,48 +36,48 @@ public class ProductsController {
 //    hàm lấy ra tất cả sản phẩm
     @GetMapping("/allproduct")
     public ResponseEntity<?> getListProduct(){
-        List<Products> products = proService.getListProducts();
-        JSONObject product = null;
-        JSONArray data = new JSONArray();
-        for(Products item : products){
-            product = new JSONObject(item);
-            JSONArray rate = rateSer.getProductStar(item.getId());
-            product.put("rate",rate);
-            data.put(product);
-        }
+        JSONArray products = productsDao.getListProduct();
+//        JSONObject product = null;
+//        JSONArray data = new JSONArray();
+//        for(Products item : products){
+//            product = new JSONObject(item);
+//            JSONArray rate = rateSer.getProductStar(item.getId());
+//            product.put("rate",rate);
+//            data.put(product);
+//        }
         JSONObject response = new JSONObject();
         response.put("code",200);
         response.put("description","Thành công");
-        response.put("result",data);
+        response.put("result",products);
         return ResponseEntity.status(HttpStatus.OK).body(response.toString());
     }
 //    Hàm lấy ra một sản phẩm
 //    VD đường dẫn http://localhost:8080/api/v1/product/1
     @GetMapping("/{id}")
     public ResponseEntity<?> getProduct(@PathVariable("id") int id){
-        Products product = proService.getProduct(id);
+        JSONObject product = productsDao.getProductId(id);
         JSONObject response = new JSONObject();
         response.put("code",200);
         response.put("description","Thành công");
-        response.put("results",new JSONObject(product));
+        response.put("results",product);
         return ResponseEntity.status(HttpStatus.OK).body(response.toString());
     }
 //    Hàm lấy những sản phẩm đang hot
     @GetMapping("/hot")
     public ResponseEntity<?> getProductHot(){
-        List<Products> products = proService.getListProductHot();
-        JSONObject product = null;
-        JSONArray data = new JSONArray();
-        for(Products item : products){
-            product = new JSONObject(item);
-            JSONArray rate = rateSer.getProductStar(item.getId());
-            product.put("rate",rate);
-            data.put(product);
-        }
+        JSONArray products = productsDao.getListProductHot();
+//        JSONObject product = null;
+//        JSONArray data = new JSONArray();
+//        for(Products item : products){
+//            product = new JSONObject(item);
+//            JSONArray rate = rateSer.getProductStar(item.getId());
+//            product.put("rate",rate);
+//            data.put(product);
+//        }
         JSONObject response = new JSONObject();
         response.put("code",200);
         response.put("description","Thành công");
-        response.put("results",data);
+        response.put("results",products);
         return ResponseEntity.status(HttpStatus.OK).body(response.toString());
     }
 
@@ -88,7 +88,7 @@ public class ProductsController {
         // tham số nhận
         String nameProduct = request.getString("name");
         // kết thúc tham số nhận
-        List<Products> products = proService.searchProducts(nameProduct);
+        JSONArray products = productsDao.getListProductName(nameProduct);
         JSONObject response = new JSONObject();
         response.put("code",200);
         response.put("description","Thành công");

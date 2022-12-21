@@ -114,7 +114,7 @@ public class AdminController {
                 productDao.insertProduct(product);
                 response.put("code", 200);
                 response.put("description", "Thành công");
-                response.put("results", proSer.getListProducts());
+                response.put("results", productDao.getListProduct());
                 return ResponseEntity.status(HttpStatus.OK).body(response.toString());
             }else{
                 response.put("code",400);
@@ -180,7 +180,7 @@ public class AdminController {
                 productDao.updateProduct(product);
                 response.put("code", 200);
                 response.put("description", "Thành công");
-                response.put("results", proSer.getListProducts());
+                response.put("results", productDao.getListProduct());
                 return ResponseEntity.status(HttpStatus.OK).body(response.toString());
             }else{
                 response.put("code",400);
@@ -210,7 +210,7 @@ public class AdminController {
                 proSer.deleteProduct(idProduct);
                 response.put("code", 200);
                 response.put("description", "Thành công");
-                response.put("results", proSer.getListProducts());
+                response.put("results", productDao.getListProduct());
                 return ResponseEntity.status(HttpStatus.OK).body(response.toString());
             }else{
                 response.put("code",400);

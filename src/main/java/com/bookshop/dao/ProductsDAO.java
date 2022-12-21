@@ -4,12 +4,15 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
 
 import com.bookshop.entities.Products;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class ProductsDAO {
+    private SimpleDateFormat sf = new SimpleDateFormat("dd/MM/yyyy");
+
     public boolean insertProduct(Products product) {
         boolean checkinsert = false;
         Connection con = null;
@@ -170,10 +173,11 @@ public class ProductsDAO {
                 obj.put("description",rs.getString("description"));
 //                obj.put("content",rs.getString("content"));
                 obj.put("photo",rs.getString("photo"));
-//                obj.put("hot",rs.getInt("hot"));
+                obj.put("hot",rs.getInt("hot"));
                 obj.put("price",rs.getDouble("price"));
                 obj.put("discount",rs.getInt("discount"));
-                obj.put("create",rs.getDate("create"));
+                java.util.Date date = new Date(rs.getDate("create").getTime());
+                obj.put("create",sf.format(date));
                 obj.put("pagenumber",rs.getInt("pagenumber"));
                 obj.put("author",rs.getString("author"));
                 response.put(obj);
@@ -244,4 +248,106 @@ public class ProductsDAO {
         }
         return checkdelete;
     }
+    
+    public JSONObject getProductId(int id){
+        JSONObject response = new JSONObject();
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try{
+            con = DBUntil.openConnection();
+            pstmt = con.prepareStatement("select * from products where id = ?;");
+            pstmt.setInt(1,id);
+            rs = pstmt.executeQuery();
+            while (rs.next()){
+                response.put("id",rs.getInt("id"));
+                response.put("categoryid",rs.getInt("categoryid"));
+                response.put("name",rs.getString("name"));
+                response.put("description",rs.getString("description"));
+//                obj.put("content",rs.getString("content"));
+                response.put("photo",rs.getString("photo"));
+                response.put("hot",rs.getInt("hot"));
+                response.put("price",rs.getDouble("price"));
+                response.put("discount",rs.getInt("discount"));
+                java.util.Date date = new Date(rs.getDate("create").getTime());
+                response.put("create",sf.format(date));
+                response.put("pagenumber",rs.getInt("pagenumber"));
+                response.put("author",rs.getString("author"));
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            DBUntil.closeAll(con,pstmt,rs);
+        }
+        return response;
+    }
+    public JSONArray getListProductHot(){
+        JSONArray response = new JSONArray();
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try{
+            con = DBUntil.openConnection();
+            pstmt = con.prepareStatement("select * from products where hot =1");
+            rs = pstmt.executeQuery();
+            while (rs.next()){
+                JSONObject obj = new JSONObject();
+                obj.put("id",rs.getInt("id"));
+                obj.put("categoryid",rs.getInt("categoryid"));
+                obj.put("name",rs.getString("name"));
+                obj.put("description",rs.getString("description"));
+//                obj.put("content",rs.getString("content"));
+                obj.put("photo",rs.getString("photo"));
+                obj.put("hot",rs.getInt("hot"));
+                obj.put("price",rs.getDouble("price"));
+                obj.put("discount",rs.getInt("discount"));
+                java.util.Date date = new Date(rs.getDate("create").getTime());
+                obj.put("create",sf.format(date));
+                obj.put("pagenumber",rs.getInt("pagenumber"));
+                obj.put("author",rs.getString("author"));
+                response.put(obj);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            DBUntil.closeAll(con,pstmt,rs);
+        }
+        return response;
+    }
+
+    public JSONArray getListProductName(String name){
+        JSONArray response = new JSONArray();
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try{
+            con = DBUntil.openConnection();
+            pstmt = con.prepareStatement("select * from products where name like ?");
+            pstmt.setString(1,"%"+name+"%");
+            rs = pstmt.executeQuery();
+            while (rs.next()){
+                JSONObject obj = new JSONObject();
+                obj.put("id",rs.getInt("id"));
+                obj.put("categoryid",rs.getInt("categoryid"));
+                obj.put("name",rs.getString("name"));
+                obj.put("description",rs.getString("description"));
+//                obj.put("content",rs.getString("content"));
+                obj.put("photo",rs.getString("photo"));
+                obj.put("hot",rs.getInt("hot"));
+                obj.put("price",rs.getDouble("price"));
+                obj.put("discount",rs.getInt("discount"));
+                java.util.Date date = new Date(rs.getDate("create").getTime());
+                obj.put("create",sf.format(date));
+                obj.put("pagenumber",rs.getInt("pagenumber"));
+                obj.put("author",rs.getString("author"));
+                response.put(obj);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            DBUntil.closeAll(con,pstmt,rs);
+        }
+        return response;
+    }
+
 }
