@@ -37,6 +37,8 @@ public class AdminController {
     private SimpleDateFormat sf = new SimpleDateFormat("dd/MM/yyyy");
 
     // đăng nhập bằng quyền admin
+    // nếu mà roleid = 1 thì đây là quyền cho khách hàng
+    // nếu mà roleid = 2 thì đây là quyền admin
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody String data) {
         JSONObject readData = new JSONObject(data);
@@ -65,7 +67,7 @@ public class AdminController {
             }
         } else {
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(new Response(400, "Tài khoản không tồn tại vui lòng đăng ký tài khoản.", ""));
+                    .body(new Response(400, "Tài khoản không tồn tại.", ""));
         }
 
     }
@@ -78,7 +80,7 @@ public class AdminController {
         int categoryid = readData.getInt("categoryid");
         String name = readData.getString("name");
         String description = readData.getString("description");
-        String content = readData.getString("content");
+//        String content = readData.getString("content");
         String photo = readData.getString("photo");
         int hot = readData.getInt("hot");
         Double price = readData.getDouble("price");
@@ -95,24 +97,31 @@ public class AdminController {
             response.put("description", "Vui lòng đăng nhập lại");
             return ResponseEntity.status(HttpStatus.OK).body(response.toString());
         } else {
-            Products product = new Products();
-            product.setAuthor(author);
-            product.setCategoryid(categoryid);
-            product.setContent(content);
-//            product.setCreate(new Date());
-            product.setDescription(description);
-            product.setDiscount(discount);
-            product.setName(name);
-            product.setPagenumber(pagenumber);
-            product.setPhoto(photo);
-            product.setHot(hot);
-            product.setPrice(price);
-             product.setCreate(sf.parse(create));
-            productDao.insertProduct(product);
-            response.put("code", 200);
-            response.put("description", "Thành công");
-            response.put("results", proSer.getListProducts());
-            return ResponseEntity.status(HttpStatus.OK).body(response.toString());
+            if(customerDao.getCustomer(session.getCustomerid()).getInt("roleId")==2){
+                Products product = new Products();
+                product.setAuthor(author);
+                product.setCategoryid(categoryid);
+    //            product.setContent(content);
+    //            product.setCreate(new Date());
+                product.setDescription(description);
+                product.setDiscount(discount);
+                product.setName(name);
+                product.setPagenumber(pagenumber);
+                product.setPhoto(photo);
+                product.setHot(hot);
+                product.setPrice(price);
+                 product.setCreate(sf.parse(create));
+                productDao.insertProduct(product);
+                response.put("code", 200);
+                response.put("description", "Thành công");
+                response.put("results", proSer.getListProducts());
+                return ResponseEntity.status(HttpStatus.OK).body(response.toString());
+            }else{
+                response.put("code",400);
+                response.put("description","Tài khoản của bạn không có quyền đăng nhập");
+                response.put("results","");
+                return ResponseEntity.ok(response.toString());
+            }
         }
     }
 
@@ -122,7 +131,8 @@ public class AdminController {
         JSONObject response = new JSONObject();
         response.put("code", 200);
         response.put("description", "Thành công");
-        response.put("results", proSer.getListProducts());
+//        response.put("results", proSer.getListProducts());
+        response.put("results", productDao.getListProduct());
         return ResponseEntity.status(HttpStatus.OK).body(response.toString());
     }
 
@@ -135,7 +145,7 @@ public class AdminController {
         int categoryid = readData.getInt("categoryid");
         String name = readData.getString("name");
         String description = readData.getString("description");
-        String content = readData.getString("content");
+//        String content = readData.getString("content");
         String photo = readData.getString("photo");
         int hot = readData.getInt("hot");
         Double price = readData.getDouble("price");
@@ -153,24 +163,31 @@ public class AdminController {
             response.put("description", "Vui lòng đăng nhập lại");
             return ResponseEntity.status(HttpStatus.OK).body(response.toString());
         } else {
-            Products product = new Products();
-            product.setId(id);
-            product.setAuthor(author);
-            product.setCategoryid(categoryid);
-            product.setContent(content);
-            product.setCreate(sf.parse(create));
-            product.setDescription(description);
-            product.setDiscount(discount);
-            product.setName(name);
-            product.setPagenumber(pagenumber);
-            product.setPhoto(photo);
-            product.setHot(hot);
-            product.setPrice(price);
-            productDao.updateProduct(product);
-            response.put("code", 200);
-            response.put("description", "Thành công");
-            response.put("results", proSer.getListProducts());
-            return ResponseEntity.status(HttpStatus.OK).body(response.toString());
+            if(customerDao.getCustomer(session.getCustomerid()).getInt("roleId")==2){
+                Products product = new Products();
+                product.setId(id);
+                product.setAuthor(author);
+                product.setCategoryid(categoryid);
+//                product.setContent(content);
+                product.setCreate(sf.parse(create));
+                product.setDescription(description);
+                product.setDiscount(discount);
+                product.setName(name);
+                product.setPagenumber(pagenumber);
+                product.setPhoto(photo);
+                product.setHot(hot);
+                product.setPrice(price);
+                productDao.updateProduct(product);
+                response.put("code", 200);
+                response.put("description", "Thành công");
+                response.put("results", proSer.getListProducts());
+                return ResponseEntity.status(HttpStatus.OK).body(response.toString());
+            }else{
+                response.put("code",400);
+                response.put("description","Tài khoản của bạn không có quyền đăng nhập");
+                response.put("results","");
+                return ResponseEntity.ok(response.toString());
+            }
         }
     }
 
@@ -189,11 +206,129 @@ public class AdminController {
             response.put("description", "Vui lòng đăng nhập lại");
             return ResponseEntity.status(HttpStatus.OK).body(response.toString());
         } else {
-            proSer.deleteProduct(idProduct);
-            response.put("code", 200);
-            response.put("description", "Thành công");
-            response.put("results", proSer.getListProducts());
+            if(customerDao.getCustomer(session.getCustomerid()).getInt("roleId")==2){
+                proSer.deleteProduct(idProduct);
+                response.put("code", 200);
+                response.put("description", "Thành công");
+                response.put("results", proSer.getListProducts());
+                return ResponseEntity.status(HttpStatus.OK).body(response.toString());
+            }else{
+                response.put("code",400);
+                response.put("description","Tài khoản của bạn không có quyền đăng nhập");
+                response.put("results","");
+                return ResponseEntity.ok(response.toString());
+            }
+        }
+    }
+    // Nguyễn Minh Đức 21/12/2022 // Bổ sung
+    // Thêm category vào trong database
+    @PostMapping("/category/add")
+    public ResponseEntity<?> addCategory (@RequestBody String data){
+        JSONObject readData = new JSONObject(data);
+        // Nhận tham số truyền vào
+        String sessionId = readData.getString("sessionId");
+        String nameCategory = readData.getString("name");
+        // Kết thúc nhận tham số.
+        Session session = sesSer.getSession(sessionId);
+        JSONObject response = new JSONObject();
+        if (session == null) {
+            response.put("code", 400);
+            response.put("description", "Vui lòng đăng nhập lại");
             return ResponseEntity.status(HttpStatus.OK).body(response.toString());
+        } else {
+            if(customerDao.getCustomer(session.getCustomerid()).getInt("roleId")==2){
+                boolean insertCategory = productDao.insertCategory(nameCategory);
+                if (insertCategory){
+                    response.put("code",200);
+                    response.put("description","Thành công");
+                    response.put("results",productDao.getCategory());
+                    return ResponseEntity.ok(response.toString());
+                }else {
+                    response.put("code",400);
+                    response.put("description","Vui lòng thử lại");
+                    response.put("results",productDao.getCategory());
+                    return ResponseEntity.ok(response.toString());
+                }
+            }else{
+                response.put("code",400);
+                response.put("description","Tài khoản của bạn không có quyền đăng nhập");
+                response.put("results","");
+                return ResponseEntity.ok(response.toString());
+            }
+        }
+    }
+
+    // Sửa tên Category
+    @PostMapping("/category/update")
+    public ResponseEntity<?> updateCategory(@RequestBody String data){
+        JSONObject readData = new JSONObject(data);
+        // Đọc tham số truyền vào
+        String sessionId = readData.getString("sessionId");
+        String nameCategory = readData.getString("name");
+        int idCategory = readData.getInt("id");
+        // Kết thúc tham số truyền vào.
+        Session session = sesSer.getSession(sessionId);
+        JSONObject response = new JSONObject();
+        if (session == null) {
+            response.put("code", 400);
+            response.put("description", "Vui lòng đăng nhập lại");
+            return ResponseEntity.status(HttpStatus.OK).body(response.toString());
+        } else {
+            if(customerDao.getCustomer(session.getCustomerid()).getInt("roleId")==2){
+                boolean check = productDao.updateCategory(nameCategory,idCategory);
+                if(check){
+                    response.put("code",200);
+                    response.put("description","Thành công");
+                    response.put("results",productDao.getCategory());
+                    return ResponseEntity.ok(response.toString());
+                }else{
+                    response.put("code",400);
+                    response.put("description","Sửa thông tin không thành công");
+                    response.put("results",productDao.getCategory());
+                    return ResponseEntity.ok(response.toString());
+                }
+            }else{
+                response.put("code",400);
+                response.put("description","Tài khoản của bạn không có quyền đăng nhập");
+                response.put("results","");
+                return ResponseEntity.ok(response.toString());
+            }
+        }
+    }
+    // xóa Category
+    @PostMapping("/category/delete")
+    public ResponseEntity<?> deleteCategory(@RequestBody String data){
+        JSONObject readData = new JSONObject(data);
+        // Đọc tham số truyền vào
+        String sessionId = readData.getString("sessionId");
+        int idCategory = readData.getInt("id");
+        // Kết thúc tham số truyền vào.
+        Session session = sesSer.getSession(sessionId);
+        JSONObject response = new JSONObject();
+        if (session == null) {
+            response.put("code", 400);
+            response.put("description", "Vui lòng đăng nhập lại");
+            return ResponseEntity.status(HttpStatus.OK).body(response.toString());
+        } else {
+            if(customerDao.getCustomer(session.getCustomerid()).getInt("roleId")==2){
+                boolean check = productDao.deleteCategory(idCategory);
+                if(check){
+                    response.put("code",200);
+                    response.put("description","Thành công");
+                    response.put("results",productDao.getCategory());
+                    return ResponseEntity.ok(response.toString());
+                }else {
+                    response.put("code",400);
+                    response.put("description","Không thành công");
+                    response.put("results",productDao.getCategory());
+                    return ResponseEntity.ok(response.toString());
+                }
+            }else{
+                response.put("code",400);
+                response.put("description","Tài khoản của bạn không có quyền đăng nhập");
+                response.put("results","");
+                return ResponseEntity.ok(response.toString());
+            }
         }
     }
 

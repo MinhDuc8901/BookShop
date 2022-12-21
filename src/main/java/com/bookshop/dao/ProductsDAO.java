@@ -22,9 +22,9 @@ public class ProductsDAO {
             pstmt.setInt(1, product.getCategoryid());
             pstmt.setString(2, product.getName());
             pstmt.setString(3, product.getDescription());
-            pstmt.setString(4, product.getContent());
+            pstmt.setString(4, "");//product.getContent()
             pstmt.setString(5, product.getPhoto());
-            pstmt.setInt(6, product.getHot());
+            pstmt.setInt(6, product.getHot());//
             pstmt.setDouble(7, product.getPrice());
             pstmt.setInt(8, product.getDiscount());
             pstmt.setInt(9, product.getPagenumber());
@@ -53,9 +53,9 @@ public class ProductsDAO {
             pstmt.setInt(1,product.getCategoryid());
             pstmt.setString(2,product.getName());
             pstmt.setString(3,product.getDescription());
-            pstmt.setString(4,product.getContent());
+            pstmt.setString(4,"");//product.getContent()
             pstmt.setString(5,product.getPhoto());
-            pstmt.setInt(6,product.getHot());
+            pstmt.setInt(6,product.getHot());//
             pstmt.setDouble(7,product.getPrice());
             pstmt.setInt(8,product.getDiscount());
             pstmt.setDate(9,new Date(product.getCreate().getTime()));
@@ -87,7 +87,7 @@ public class ProductsDAO {
                 obj.put("categoryid",rs.getInt("categoryid"));
                 obj.put("name",rs.getString("name"));
                 obj.put("description",rs.getString("description"));
-                obj.put("content",rs.getString("content"));
+//                obj.put("content",rs.getString("content"));
                 obj.put("photo",rs.getString("photo"));
                 obj.put("hot",rs.getInt("hot"));
                 obj.put("price",rs.getDouble("price"));
@@ -151,5 +151,97 @@ public class ProductsDAO {
             DBUntil.closeAll(con,pstmt,rs);
         }
         return response;
+    }
+//  Nguyễn Minh Đức 21/12/2022 Start.
+    public JSONArray getListProduct(){
+        JSONArray response = new JSONArray();
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            con = DBUntil.openConnection();
+            pstmt = con.prepareStatement("SELECT * from Products");
+            rs = pstmt.executeQuery();
+            while(rs.next()){
+                JSONObject obj = new JSONObject();
+                obj.put("id",rs.getInt("id"));
+                obj.put("categoryid",rs.getInt("categoryid"));
+                obj.put("name",rs.getString("name"));
+                obj.put("description",rs.getString("description"));
+//                obj.put("content",rs.getString("content"));
+                obj.put("photo",rs.getString("photo"));
+//                obj.put("hot",rs.getInt("hot"));
+                obj.put("price",rs.getDouble("price"));
+                obj.put("discount",rs.getInt("discount"));
+                obj.put("create",rs.getDate("create"));
+                obj.put("pagenumber",rs.getInt("pagenumber"));
+                obj.put("author",rs.getString("author"));
+                response.put(obj);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            DBUntil.closeAll(con,pstmt,rs);
+        }
+        return response;
+    }
+    public boolean insertCategory(String name){
+        boolean checkinsert = false;
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try{
+            con = DBUntil.openConnection();
+            pstmt = con.prepareStatement("INSERT INTO Categories (`parentid`, `name`) VALUES ('1', ?);");
+            pstmt.setString(1,name);
+            int check = pstmt.executeUpdate();
+            if (check>0) checkinsert = true;
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            DBUntil.closeAll(con,pstmt,rs);
+        }
+        return  checkinsert;
+    }
+
+    public boolean updateCategory(String name , int id){
+        boolean checkupdate = false;
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try{
+            con = DBUntil.openConnection();
+            pstmt = con.prepareStatement("UPDATE categories\n" +
+                    "SET `name` = ?\n" +
+                    "WHERE id = ?;");
+            pstmt.setString(1,name);
+            pstmt.setInt(2,id);
+            int update = pstmt.executeUpdate();
+            if (update>0) checkupdate = true;
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            DBUntil.closeAll(con,pstmt,rs);
+        }
+        return checkupdate;
+    }
+
+    public boolean deleteCategory(int id){
+        boolean checkdelete = false;
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            con = DBUntil.openConnection();
+            pstmt = con.prepareStatement("DELETE FROM categories WHERE id = ?;");
+            pstmt.setInt(1,id);
+            int check = pstmt.executeUpdate();
+            if (check>0) checkdelete = true;
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            DBUntil.closeAll(con,pstmt,rs);
+        }
+        return checkdelete;
     }
 }
