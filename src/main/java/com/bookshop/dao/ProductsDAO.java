@@ -11,7 +11,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class ProductsDAO {
-    private SimpleDateFormat sf = new SimpleDateFormat("dd/MM/yyyy");
+    private SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
+    private SimpleDateFormat sfTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public boolean insertProduct(Products product) {
         boolean checkinsert = false;
@@ -114,7 +115,9 @@ public class ProductsDAO {
         ResultSet rs = null;
         try{
             con = DBUntil.openConnection();
-            pstmt = con.prepareStatement("select * from Comments where productid = ?");
+            pstmt = con.prepareStatement("select com.id , com.productid, com.content, com.idcustomer, com.star, com.create, " +
+                    "cu.name,cu.email,cu.address, cu.phone,cu.photo \n" +
+                    "from Comments com, Customers cu where productid = ? and cu.id = com.idcustomer ;");
             pstmt.setInt(1,idProduct);
             rs = pstmt.executeQuery();
             while (rs.next()){
@@ -124,6 +127,12 @@ public class ProductsDAO {
                 item.put("content",rs.getString("content"));
                 item.put("idcustomer",rs.getInt("idcustomer"));
                 item.put("star",rs.getInt("star"));
+                String time = sfTime.format(rs.getTimestamp("create").getTime());
+                item.put("create",time);
+                item.put("name",rs.getString("name"));
+                item.put("email",rs.getString("email"));
+                item.put("address",rs.getString("address"));
+                item.put("photo",rs.getString("photo") != null ? rs.getString("photo"):"Không có ảnh");
                 response.put(item);
             }
         }catch (Exception e){

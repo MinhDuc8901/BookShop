@@ -38,7 +38,7 @@ public class CartController {
             if(checksave){
                 response.put("code",200);
                 response.put("description","Thành công");
-                response.put("results","");
+                response.put("results",orderDetaildao.listCartCustomer(session.getCustomerid()));
                 return ResponseEntity.status(HttpStatus.OK).body(response.toString());
             }
             response.put("code",400);
