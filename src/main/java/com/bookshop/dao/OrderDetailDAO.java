@@ -43,7 +43,7 @@ public class OrderDetailDAO {
         ResultSet rs = null;
         try{
             con = DBUntil.openConnection();
-            pstmt = con.prepareStatement("select od.id as idorderdetail, od.quantity, od.price,od.create, pro.id as productid, pro.photo, pro.name, pro.discount from OrderDetail od , Products pro where od.productid = pro.id and od.customerid = ?;");
+            pstmt = con.prepareStatement("select od.id as idorderdetail, od.quantity, od.price,od.create, pro.id as productid, pro.photo, pro.name, pro.discount from OrderDetail od , Products pro where od.productid = pro.id and od.customerid = ? and od.status=0;");
             pstmt.setInt(1,idCustomer);
             rs = pstmt.executeQuery();
             while (rs.next()){
@@ -94,7 +94,7 @@ public class OrderDetailDAO {
         ResultSet rs = null;
         try{
             con = DBUntil.openConnection();
-            pstmt = con.prepareStatement("select od.id as idorderdetail, od.quantity,od.price , od.create , p.name, p.photo, p.content from OrderDetail od , Products p where od.productid = p.id and od.orderid = ? ;");
+            pstmt = con.prepareStatement("select od.id as idorderdetail, od.quantity,od.price , od.create , p.name, p.photo, p.content,p.discount from OrderDetail od , Products p where od.productid = p.id and od.orderid = ? ;");
             pstmt.setInt(1, idorder);
             rs = pstmt.executeQuery();
             while (rs.next()){
@@ -102,9 +102,11 @@ public class OrderDetailDAO {
                 item.put("idorderdetail",rs.getInt("idorderdetail"));
                 item.put("quantity",rs.getInt("quantity"));
                 item.put("price",rs.getDouble("price"));
-                item.put("create",rs.getDate("create"));
+                item.put("create",rs.getTimestamp("create"));
+
                 item.put("name",rs.getString("name"));
                 item.put("photo",rs.getString("photo"));
+                item.put("discount",rs.getDouble("discount"));
                 item.put("content",rs.getString("content"));
                 array.put(item);
             }
@@ -123,11 +125,33 @@ public class OrderDetailDAO {
         ResultSet rs = null;
         try {
             con = DBUntil.openConnection();
-            pstmt = con.prepareStatement("update OrderDetail set orderid = ? where id = ?;");
+            pstmt = con.prepareStatement("update OrderDetail set orderid = ? , status = 1 where id = ?;");
             pstmt.setInt(1,idorder);
             pstmt.setInt(2,id);
             int a = pstmt.executeUpdate();
             if(a>0) check = true;
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            DBUntil.closeAll(con,pstmt,rs);
+        }
+        return check;
+    }
+
+    public boolean checkAddCart(int idCustomer , int idProduct){
+        boolean check = false;
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try{
+            con = DBUntil.openConnection();
+            pstmt = con.prepareStatement("select * from OrderDetail where customerid = ? and productid = ? and status = 0");
+            pstmt.setInt(1,idCustomer);
+            pstmt.setInt(2,idProduct);
+            rs = pstmt.executeQuery();
+            while (rs.next()){
+                check = true;
+            }
         }catch (Exception e){
             e.printStackTrace();
         }finally {

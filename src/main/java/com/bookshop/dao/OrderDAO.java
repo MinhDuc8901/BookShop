@@ -24,7 +24,7 @@ public class OrderDAO {
                 JSONObject item = new JSONObject();
                 item.put("id",rs.getInt("id"));
                 item.put("customerid",rs.getInt("customerid"));
-                item.put("create",rs.getDate("create"));
+                item.put("create",rs.getTimestamp("create"));
                 item.put("price",rs.getDouble("price"));
                 item.put("status",rs.getInt("status"));
                 item.put("product",orderDetailDao.getListProduct(rs.getInt("id")));

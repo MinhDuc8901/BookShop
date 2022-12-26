@@ -34,17 +34,25 @@ public class CartController {
             response.put("description","Vui lòng đăng nhập lại");
             return ResponseEntity.status(HttpStatus.OK).body(response.toString());
         }else{
-            boolean checksave = orderDetaildao.saveOrderDetail(session.getCustomerid(),productId,quantity,price);
-            if(checksave){
-                response.put("code",200);
-                response.put("description","Thành công");
-                response.put("results",orderDetaildao.listCartCustomer(session.getCustomerid()));
-                return ResponseEntity.status(HttpStatus.OK).body(response.toString());
+            boolean checkEx = orderDetaildao.checkAddCart(session.getCustomerid(),productId);
+            System.out.println(checkEx);
+            if(checkEx == false){
+                boolean checksave = orderDetaildao.saveOrderDetail(session.getCustomerid(),productId,quantity,price);
+                if(checksave){
+                    response.put("code",200);
+                    response.put("description","Thành công");
+                    response.put("results",orderDetaildao.listCartCustomer(session.getCustomerid()));
+                    return ResponseEntity.status(HttpStatus.OK).body(response.toString());
+                }
+                response.put("code",400);
+                response.put("description","Lỗi cơ sở dữ liệu");
+                response.put("description","");
+                return ResponseEntity.status(HttpStatus.OK).body(response);
+            }else{
+                response.put("code",400);
+                response.put("description","Sản phẩm đã tồn tại trong giỏ hàng.");
+                return ResponseEntity.ok(response.toString());
             }
-            response.put("code",400);
-            response.put("description","Lỗi cơ sở dữ liệu");
-            response.put("description","");
-            return ResponseEntity.status(HttpStatus.OK).body(response);
         }
     }
     // lấy ra tắt cả sản phẩm trong giỏ hàng của khách hàng

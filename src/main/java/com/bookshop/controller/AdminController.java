@@ -34,7 +34,7 @@ public class AdminController {
     private ProductsDAO productDao = new ProductsDAO();
 
     // convert string to date
-    private SimpleDateFormat sf = new SimpleDateFormat("dd/MM/yyyy");
+    private SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
 
     // đăng nhập bằng quyền admin
     // nếu mà roleid = 1 thì đây là quyền cho khách hàng
@@ -68,6 +68,29 @@ public class AdminController {
         } else {
             return ResponseEntity.status(HttpStatus.OK)
                     .body(new Response(400, "Tài khoản không tồn tại.", ""));
+        }
+
+    }
+
+    // check khi vào trang thấy có session sẵn tự động vào luôn
+    @PostMapping("/checkLogin")
+    public ResponseEntity<?> checkLogin(@RequestBody String data){
+        JSONObject readData = new JSONObject(data);
+        // nhận tham số ddaaauf vào
+        String sessionId = readData.getString("sessionId");
+        // kết thúc nhận tham số đầu vàoo
+        Session dataSession = sesSer.getSession(sessionId);
+        JSONObject response = new JSONObject();
+        if(customerDao.getCustomer(dataSession.getCustomerid()).getInt("roleId")==2){
+            response.put("code",200);
+            response.put("description","Thành công");
+            response.put("results","");
+            return ResponseEntity.ok(response.toString());
+        }else{
+            response.put("code",400);
+            response.put("description","Không thành công");
+            response.put("results","");
+            return ResponseEntity.ok(response.toString());
         }
 
     }
