@@ -21,6 +21,7 @@ public class CustomerDAO {
                 response.put("name",rs.getString("name"));
                 response.put("email",rs.getString("email"));
                 response.put("address",rs.getString("address"));
+                response.put("photo",rs.getString("photo"));
                 response.put("phone",rs.getString("phone"));
                 response.put("roleId",rs.getInt("roleid"));
             }
@@ -56,6 +57,5 @@ public class CustomerDAO {
         return response;
     }
 
-//  Nguyễn Minh Đức 21/12/2022 Start
 
 }

@@ -49,7 +49,7 @@ public class AdminController {
         Customers getCustomer = cusService.getCustomer(email);
         JSONObject response = new JSONObject();
         if (getCustomer != null) {
-            if (customerDao.getRole(getCustomer.getRoleid()).getInt("admin") == 1) {
+            if (customerDao.getCustomer(getCustomer.getId()).getInt("roleId")==2) {
                 if (getCustomer.getPassword().equals(password)) {
                     UUID createSession = UUID.randomUUID();
                     Session session = cusService.SaveSession(getCustomer.getId(), createSession.toString());
