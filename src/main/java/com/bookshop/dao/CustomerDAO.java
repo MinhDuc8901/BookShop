@@ -56,6 +56,30 @@ public class CustomerDAO {
         }
         return response;
     }
-
+    // update thông tin cá nhân
+    public boolean insertInfo(int id, String name, String email, String address,String phone, String passwd, String photo){
+        boolean checkinsert = false;
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try{
+            con = DBUntil.openConnection();
+            pstmt = con.prepareStatement("update Customers set name = ?, email = ?, address = ?, phone = ?, password = ?,photo=? where id = ?");
+            pstmt.setString(1,name);
+            pstmt.setString(2,email);
+            pstmt.setString(3,address);
+            pstmt.setString(4,phone);
+            pstmt.setString(5,passwd);
+            pstmt.setString(6,photo);
+            pstmt.setInt(7,id);
+            int a = pstmt.executeUpdate();
+            if(a>0) checkinsert = true;
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            DBUntil.closeAll(con,pstmt,rs);
+        }
+        return checkinsert;
+    }
 
 }

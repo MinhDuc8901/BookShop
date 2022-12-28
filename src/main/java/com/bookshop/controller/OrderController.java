@@ -94,4 +94,26 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.OK).body(response.toString());
         }
     }
+    // lấy về danh sách đơn đã hỏng
+    @PostMapping("/listremove")
+    public ResponseEntity<?> listOrderRemove(@RequestBody String data){
+        JSONObject readData = new JSONObject(data);
+        // tham số nhận
+        String sessionId = readData.getString("sessionId");
+        // kết thúc tham số nhận
+        Session session = sesSer.getSession(sessionId);
+        JSONObject response = new JSONObject();
+        if(session == null){
+            response.put("code",400);
+            response.put("description","Vui lòng đăng nhập lại");
+            return ResponseEntity.status(HttpStatus.OK).body(response.toString());
+        }else{
+
+            response.put("code",200);
+            response.put("description","Thành công");
+            response.put("results",orderDAO.getListOrderRemove(session.getCustomerid()));
+            return ResponseEntity.status(HttpStatus.OK).body(response.toString());
+        }
+    }
+
 }

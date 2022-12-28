@@ -186,6 +186,7 @@ public class AdminController {
             response.put("description", "Vui lòng đăng nhập lại");
             return ResponseEntity.status(HttpStatus.OK).body(response.toString());
         } else {
+            System.out.println(session.toString());
             if(customerDao.getCustomer(session.getCustomerid()).getInt("roleId")==2){
                 Products product = new Products();
                 product.setId(id);
@@ -354,5 +355,42 @@ public class AdminController {
             }
         }
     }
+
+    // update thông tin cá nhân
+    @PostMapping("/updateinfo")
+    public ResponseEntity<?> updateInfo(@RequestBody String data){
+        JSONObject readData = new JSONObject(data);
+        // đọc tham số đầu vào
+        String sessionId = readData.getString("sessionId");
+        String name = readData.getString("name");
+        String email = readData.getString("email");
+        String address = readData.getString("address");
+        String phone = readData.getString("phone");
+        String password = readData.getString("password");
+        String photo = readData.getString("photo");
+        // kết thúc đọc tham số đầu vào
+        Session session = sesSer.getSession(sessionId);
+        JSONObject response = new JSONObject();
+        if (session == null) {
+            response.put("code", 400);
+            response.put("description", "Vui lòng đăng nhập lại");
+            return ResponseEntity.status(HttpStatus.OK).body(response.toString());
+        } else {
+            boolean check = customerDao.insertInfo(session.getCustomerid(),name,email,address,phone,password,photo);
+            if(check){
+                response.put("code",200);
+                response.put("description","Thành công");
+                response.put("results",customerDao.getCustomer(session.getCustomerid()));
+                return ResponseEntity.ok(response.toString());
+            }
+            else {
+                response.put("code",400);
+                response.put("description","Cập nhật thông tin thành công");
+                response.put("results","");
+                return ResponseEntity.ok(response.toString());
+            }
+        }
+    }
+
 
 }

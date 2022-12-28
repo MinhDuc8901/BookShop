@@ -17,7 +17,35 @@ public class OrderDAO {
         ResultSet rs = null;
         try {
             con = DBUntil.openConnection();
-            pstmt = con.prepareStatement("select * from Orders where customerid = ?;");
+            pstmt = con.prepareStatement("select * from Orders where customerid = ? and status = 1;");
+            pstmt.setInt(1,idCustomer);
+            rs = pstmt.executeQuery();
+            while (rs.next()){
+                JSONObject item = new JSONObject();
+                item.put("id",rs.getInt("id"));
+                item.put("customerid",rs.getInt("customerid"));
+                item.put("create",rs.getTimestamp("create"));
+                item.put("price",rs.getDouble("price"));
+                item.put("status",rs.getInt("status"));
+                item.put("product",orderDetailDao.getListProduct(rs.getInt("id")));
+                array.put(item);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            DBUntil.closeAll(con,pstmt,rs);
+        }
+        return array;
+    }
+
+    public JSONArray getListOrderRemove(int idCustomer){
+        JSONArray array = new JSONArray();
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            con = DBUntil.openConnection();
+            pstmt = con.prepareStatement("select * from Orders where customerid = ? and status = 0;");
             pstmt.setInt(1,idCustomer);
             rs = pstmt.executeQuery();
             while (rs.next()){
@@ -47,7 +75,9 @@ public class OrderDAO {
 //            pstmt = con.prepareStatement("UPDATE Orders\n" +
 //                    "SET `status` = 0\n" +
 //                    "WHERE id = ?;");
-            pstmt = con.prepareStatement("DELETE FROM Orders WHERE id =?;");
+//            pstmt = con.prepareStatement("DELETE FROM Orders WHERE id =?;");
+            pstmt = con.prepareStatement("UPDATE Orders set status = 0 WHERE id =?;");
+
             pstmt.setInt(1,idOrder);
             int a = pstmt.executeUpdate();
             if(a>0){
